@@ -40,101 +40,53 @@ public class Main {
         // 'a', 'b' и 'c', которые разбирали бы свою очередь и выполняли подсчёты.
         // Поток для подстчёта символов 'a'
         Thread aThread = new Thread(() -> {
-            int maxSize = 0;
-            String text = "";
-            while (true) {
-                try {
-                    text = aCounterQueue.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                for (int i = 0; i < text.length(); i++) {
-                    for (int j = 0; j < text.length(); j++) {
-                        if (i >= j) {
-                            continue;
-                        }
-                        boolean aFound = false;
-                        for (int k = i; k < j; k++) {
-                            if (text.charAt(k) == 'a') {
-                                aFound = true;
-                                break;
-                            }
-                        }
-                        if (!aFound && maxSize < j - i) {
-                            maxSize = j - i;
-                        }
-                    }
-                }
-                System.out.println(text.substring(0, 100) + " -> " + maxSize + "a");
-            }
+            countCharacters(aCounterQueue, 'a');
         });
 
         // Поток для подстчёта символов 'b'
         Thread bThread = new Thread(() -> {
-            int maxSize = 0;
-            String text = "";
-            while (true) {
-                try {
-                    text = bCounterQueue.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                for (int i = 0; i < text.length(); i++) {
-                    for (int j = 0; j < text.length(); j++) {
-                        if (i >= j) {
-                            continue;
-                        }
-                        boolean bFound = false;
-                        for (int k = i; k < j; k++) {
-                            if (text.charAt(k) == 'b') {
-                                bFound = true;
-                                break;
-                            }
-                        }
-                        if (!bFound && maxSize < j - i) {
-                            maxSize = j - i;
-                        }
-                    }
-                }
-                System.out.println(text.substring(0, 100) + " -> " + maxSize + "b");
-            }
+            countCharacters(bCounterQueue, 'b');
         });
 
         // Поток для подстчёта символов 'c'
         Thread cThread = new Thread(() -> {
-            int maxSize = 0;
-            String text = "";
-            while (true) {
-                try {
-                    text = cCounterQueue.take();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                for (int i = 0; i < text.length(); i++) {
-                    for (int j = 0; j < text.length(); j++) {
-                        if (i >= j) {
-                            continue;
-                        }
-                        boolean cFound = false;
-                        for (int k = i; k < j; k++) {
-                            if (text.charAt(k) == 'c') {
-                                cFound = true;
-                                break;
-                            }
-                        }
-                        if (!cFound && maxSize < j - i) {
-                            maxSize = j - i;
-                        }
-                    }
-                }
-                System.out.println(text.substring(0, 100) + " -> " + maxSize + "c");
-            }
+            countCharacters(cCounterQueue, 'c');
         });
 
         generatorThread.start();
         aThread.start();
         bThread.start();
         cThread.start();
+    }
+
+    private static void countCharacters(BlockingQueue<String> queue, char characterToFind) {
+        int maxSize = 0;
+        String text = "";
+        while (true) {
+            try {
+                text = queue.take();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            for (int i = 0; i < text.length(); i++) {
+                for (int j = 0; j < text.length(); j++) {
+                    if (i >= j) {
+                        continue;
+                    }
+                    boolean charFound = false;
+                    for (int k = i; k < j; k++) {
+                        if (text.charAt(k) == characterToFind) {
+                            charFound = true;
+                            break;
+                        }
+                    }
+                    if (!charFound && maxSize < j - i) {
+                        maxSize = j - i;
+                    }
+                }
+            }
+            System.out.println(text.substring(0, 100) + " -> " + maxSize + " " + characterToFind);
+        }
     }
 
     public static String generateText(String letters, int length) {
